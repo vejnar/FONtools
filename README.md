@@ -1,7 +1,3 @@
----
-title: "FONtools"
----
-
 # ![Logo](doc/logo.svg)
 
 FONtools combines:
