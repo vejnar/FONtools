@@ -1,0 +1,1 @@
+https://gitlab.com/vejnar/pyfnutils/-/archive/v1.1/pyfnutils-v1.1.tar.gz#egg=pyfnutils
