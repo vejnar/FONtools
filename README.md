@@ -100,10 +100,10 @@ See [tags](/../../tags) page.
 
 ## Install
 
-Download the latest [release](/../../tags), then:
+Download the latest [release](/../../tags), then (`X.X` is the latest FONtools version):
 ```bash
-tar xvfz fontools.tar.gz
-cd fontools
+tar xvfz fontools-X.X.tar.gz
+cd fontools-X.X
 pip3 install --requirement requirements.txt .
 ```
 *Don't forget the . (dot) at the end of the command.*
