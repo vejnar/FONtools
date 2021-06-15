@@ -138,7 +138,7 @@ def main(argv=None):
         if config['species'][0] == 'all':
             lspecies = [s['name'] for s in jp['species']]
         elif config['species'][0] == 'list':
-            for s in jp['species']:
+            for s in sorted(jp['species']):
                 print(s['name'])
             return 0
     else:
