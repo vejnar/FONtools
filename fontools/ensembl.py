@@ -83,7 +83,7 @@ class Ensembl(EnsemblSource):
 class EnsemblGenomes(EnsemblSource):
     taxons = ['bacteria', 'fungi', 'metazoa', 'plants', 'protists']
     url_protocol = 'http://'
-    url_path = string.Template('ftp.ensemblgenomes.org/vol1/pub/release-${version}/${taxon}/')
+    url_path = string.Template('ftp.ensemblgenomes.org/pub/release-${version}/${taxon}/')
 
 def chrom_ensembl2ucsc(ensembl_chrom, name_mapping=None):
     if name_mapping is not None:
