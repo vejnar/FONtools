@@ -246,9 +246,12 @@ def main(argv=None):
                 run_cmd(['fasta_seq_length',
                          '--input', path_genome_local,
                          '--output', path_genome_chrom_length_local], logger)
-                if not config['ucsc_naming'] and 'fontools_path_mapping' in config:
-                    path_mapping = source.search_mapping_file(genome_version, config['fontools_path_mapping'])
-                    path_genome_chrom_length_local_ucsc = path_genome_chrom_length_local.replace('_chrom_length.tab', '_ucsc_names_chrom_length.tab')
+            if not config['ucsc_naming'] and 'fontools_path_mapping' in config:
+                path_mapping = source.search_mapping_file(genome_version, config['fontools_path_mapping'])
+                path_genome_chrom_length_local_ucsc = path_genome_chrom_length_local.replace('_chrom_length.tab', '_ucsc_names_chrom_length.tab')
+                if os.path.exists(path_genome_chrom_length_local_ucsc):
+                    logger.info('Found ' + path_genome_chrom_length_local_ucsc)
+                else:
                     if path_mapping is not None:
                         logger.info('Creating chromosome length file for UCSC ' + path_genome_chrom_length_local_ucsc)
                         run_cmd(['ensembl2ucsc',
