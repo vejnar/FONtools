@@ -1,4 +1,4 @@
-# ![Logo](doc/logo.svg)
+# ![FONtools](doc/logo.svg)
 
 FONtools combines:
 * The new FON (Feature Object Notation) format to store genomic annotations based on [JSON](https://en.wikipedia.org/wiki/JSON)
