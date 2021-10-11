@@ -100,17 +100,13 @@ See [tags](/../../tags) page.
 
 ## Install
 
-Download the latest [release](/../../tags), then (`X.X` is the latest FONtools version):
 ```bash
-tar xvfz fontools-X.X.tar.gz
-cd fontools-X.X
-pip3 install --requirement requirements.txt .
+pip3 install fontools
 ```
-*Don't forget the . (dot) at the end of the command.*
 
 If you don't have root permission, install in your home using `--user` option:
 ```bash
-pip3 install --requirement requirements.txt --user .
+pip3 install fontools --user
 ```
 Scripts are installed in `$HOME/.local/bin`, which should be added to your shell [PATH](https://linuxhint.com/path_in_bash) to run the scripts. After adding for example `$HOME/.local/bin` to your [PATH](https://linuxhint.com/path_in_bash), try:
 ```bash
