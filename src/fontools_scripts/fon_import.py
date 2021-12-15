@@ -95,6 +95,11 @@ def main(argv=None):
     parser.add_argument('--bed_name_as_id', dest='bed_name_as_id', action='store_true', help='BED: Use name (BED 4th column) as ID.')
     parser.add_argument('--bed_feature_id', dest='bed_feature_id', action='store', default='transcript_stable_id', help='BED: Feature ID (default:transcript_stable_id).')
     parser.add_argument('--bed_interval_name', dest='bed_interval_name', action='store', default='exons', help='BED: Interval name (default:exons).')
+    parser.add_argument('--table_transcript', dest='path_table_transcript', action='store', help='Path to table transcript.txt.gz'),
+    parser.add_argument('--table_object_xref', dest='path_table_object_xref', action='store', help='Path to table object_xref.txt.gz'),
+    parser.add_argument('--table_xref', dest='path_table_xref', action='store', help='Path to table xref.txt.gz'),
+    parser.add_argument('--table_ontology', dest='path_table_ontology', action='store', help='Path to table ontology.txt.gz'),
+    parser.add_argument('--table_term', dest='path_table_term', action='store', help='Path to table term.txt.gz')
     args = parser.parse_args(argv[1:])
 
     # Logging
@@ -116,6 +121,12 @@ def main(argv=None):
         if len(count_noseq) > 0:
             noseq_msg = ' '.join([f'{k}:{v}' for k, v in count_noseq.items()])
             logger.info('Missing transcript sequence: '+noseq_msg)
+
+    if args.path_table_transcript and args.path_table_object_xref and args.path_table_xref and args.path_table_ontology and args.path_table_term:
+        logger.info('Add gene ontology (GO)')
+        db = ft.ensembl_db.EnsemblDBGO(args.path_table_transcript, args.path_table_object_xref, args.path_table_xref, args.path_table_ontology, args.path_table_term)
+        missing_terms = db.add_go(transcripts)
+        logger.info(f'Missing GO terms: {len(missing_terms)}')
 
     logger.info(f'Transcript(s) found: {len(transcripts)}')
 

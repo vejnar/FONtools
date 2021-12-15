@@ -10,6 +10,7 @@
 
 from . import bed
 from . import ensembl
+from . import ensembl_db
 from . import gff
 from . import indexes
 from . import naming

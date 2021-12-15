@@ -47,6 +47,7 @@ def main(argv=None):
     parser.add_argument('-z', '--skip_rest_cache', dest='skip_rest_cache', action='store_true', help='Don\'t use REST cache.')
     parser.add_argument('-t', '--steps', dest='steps', action='store', default='all', help='Get all or gg (=genome,gene) or genome,gene,bowtie2,star (comma separated).')
     parser.add_argument('-u', '--ucsc_naming', dest='ucsc_naming', action='store_true', default=False, help='Convert to UCSC chromosome/scaffold naming.')
+    parser.add_argument('-g', '--import_go', dest='import_go', action='store_true', default=False, help='Import Gene Ontology.')
     parser.add_argument('-p', '--processor', dest='num_processor', action='store', type=int, default=1, help='Number of processor')
     parser.add_argument('--path_config', dest='path_config', action='store', help='Path to config')
     args = parser.parse_args(argv[1:])
@@ -205,6 +206,22 @@ def main(argv=None):
                     logger.info('Downloading ' + p)
                     ft.remote.rget(url_protocol + url_path + p, cwd=config['fontools_path_download'])
 
+            # Download GO
+            if config['import_go']:
+                path_species_db = source.get_species_database_path(url_path, species, config['release'])
+                path_go_db = source.get_ontology_database_path(config['release'])
+                for path_db, table in [(path_species_db, 'transcript'),
+                                       (path_species_db, 'object_xref'),
+                                       (path_species_db, 'xref'),
+                                       (path_go_db, 'ontology'),
+                                       (path_go_db, 'term')]:
+                    path_table_full = os.path.join(config['fontools_path_download'], path_db, f'{table}.txt.gz')
+                    if os.path.exists(path_table_full):
+                        logger.info('Found ' + path_table_full)
+                    else:
+                        logger.info('Downloading ' + p)
+                        ft.remote.rget(url_protocol + f'{path_db}/{table}.txt.gz', cwd=config['fontools_path_download'])
+
         # Sort/Convert/Copy chromosome names
         for s, pr, p, pl in [('genome', 'seqs', path_genome, path_genome_local), ('gene', 'annots', path_gff, path_gff_local)]:
             if s in steps:
@@ -280,6 +297,13 @@ def main(argv=None):
                        '--output_format', 'fon']
                 if config['ucsc_naming']:
                     cmd.append('--ucsc_names')
+                # Add GO annotation
+                if config['import_go']:
+                    cmd.extend(['--table_transcript', os.path.join(config['fontools_path_download'], path_species_db, 'transcript.txt.gz'),
+                                '--table_object_xref', os.path.join(config['fontools_path_download'], path_species_db, 'object_xref.txt.gz'),
+                                '--table_xref', os.path.join(config['fontools_path_download'], path_species_db, 'xref.txt.gz'),
+                                '--table_ontology', os.path.join(config['fontools_path_download'], path_go_db, 'ontology.txt.gz'),
+                                '--table_term', os.path.join(config['fontools_path_download'], path_go_db, 'term.txt.gz')])
                 run_cmd(cmd, logger)
 
         # Select/merge transcript(s)
