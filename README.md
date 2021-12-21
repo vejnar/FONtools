@@ -61,7 +61,14 @@ Example for one zebrafish transcript (one feature):
             "utr5_exons_on_transcript": [[0, 72]],
             "utr3_exons": [],
             "utr3_exons_on_transcript": [],
-            "seq": "TTGGTCTCGCGTCTTGTTCTTCACAGTTTGACGACAGCCGCCATCATTCCGTGCTGCAAGGGCGACCCCAAAATGTCTTCCAACGGTGATCTGCAGGACGTTGGGAGTTGGGACAGCTTCTGGGAGCCTGGAAACTACAAGAGGACGGTTAAGCGCATTGACGACGGCTACAAACTTTGCAACGAGCTGGTCAGCTGCTTCCAGGAGCGGGCCAAGATTGAGAAGGGCTATTCCCAGCAGCTGAGCGACTGGGCTAGGAAATGGAGAGGCATTGTGGAGAAAG"
+            "seq": "TTGGTCTCGCGTCTTGTTCTTCACAGTTTGACGACAGCCGCCATCATTCCGTGCTGCAAGGGCGACCCCAAAATGTCTTCCAACGGTGATCTGCAGGACGTTGGGAGTTGGGACAGCTTCTGGGAGCCTGGAAACTACAAGAGGACGGTTAAGCGCATTGACGACGGCTACAAACTTTGCAACGAGCTGGTCAGCTGCTTCCAGGAGCGGGCCAAGATTGAGAAGGGCTATTCCCAGCAGCTGAGCGACTGGGCTAGGAAATGGAGAGGCATTGTGGAGAAAG",
+            "go": {
+                "GO:0097320": {
+                    "term": "plasma membrane tubulation",
+                    "domain": "biological_process",
+                    "sources": []
+                }
+            }
         }
     ]
 }
@@ -89,6 +96,7 @@ Field descriptions:
           GCA
     ```
 * `seq` contains the transcript sequence.
+* `go` holds [Gene Ontology (GO)](http://geneontology.org) terms, domains and sources. *Optional*: GO is only imported with the `--go` option from the `import_ensembl` script.
 
 ## Future FON version
 
@@ -262,6 +270,8 @@ To select what data are generated, use the `--steps`/`-t` option. Currently, the
     * longest transcripts.
 * `bowtie2` and `star` to create indices for [Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2) and [STAR](https://github.com/alexdobin/STAR) respectively.
 * `all` of the above steps. This is the default. 
+
+To import terms, domains and sources from [Gene Ontology (GO)](http://geneontology.org), add the `--go` option.
 
 ### Example
 
