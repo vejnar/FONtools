@@ -44,10 +44,11 @@ def main(argv=None):
     parser.add_argument('-s', '--species', dest='species', action='store', required=True, help='Ensembl species name: all, list or name (e.g. danio_rerio) (comma separated).')
     parser.add_argument('-r', '--release', dest='release', action='store', required=True, help='Ensembl release.')
     parser.add_argument('-a', '--path_rest_cache', dest='path_rest_cache', action='store', help='Path to REST cache.')
-    parser.add_argument('-z', '--skip_rest_cache', dest='skip_rest_cache', action='store_true', help='Don\'t use REST cache.')
+    parser.add_argument('-x', '--skip_rest_cache', dest='skip_rest_cache', action='store_true', help='Don\'t use REST cache.')
     parser.add_argument('-t', '--steps', dest='steps', action='store', default='all', help='Get all or gg (=genome,gene) or genome,gene,bowtie2,star (comma separated).')
     parser.add_argument('-u', '--ucsc_naming', dest='ucsc_naming', action='store_true', default=False, help='Convert to UCSC chromosome/scaffold naming.')
     parser.add_argument('-g', '--import_go', dest='import_go', action='store_true', default=False, help='Import Gene Ontology.')
+    parser.add_argument('-z', '--compress', dest='compress', action='store_true', default=False, help='Compress output when possible.')
     parser.add_argument('-p', '--processor', dest='num_processor', action='store', type=int, default=1, help='Number of processor')
     parser.add_argument('--path_config', dest='path_config', action='store', help='Path to config')
     args = parser.parse_args(argv[1:])
@@ -110,6 +111,8 @@ def main(argv=None):
             if idxname in steps:
                 idx = idxc()
                 exes.append(idx.get_exe())
+        if config['compress']:
+            exes.append('zstd')
     check_exe(exes)
 
     # Source
@@ -283,6 +286,8 @@ def main(argv=None):
             path_fon = string.Template(path_fon_local).substitute(biotype='all', version='1')
             if os.path.exists(path_fon):
                 logger.info('Found ' + path_fon)
+            elif os.path.exists(path_fon+'.zst'):
+                logger.info('Found ' + path_fon + '.zst')
             else:
                 logger.info('Importing annotation')
                 cmd = ['fon_import',
@@ -315,12 +320,22 @@ def main(argv=None):
                 path_fon = string.Template(path_fon_local).substitute(biotype=method_name + '_' + biotype, version='1')
                 if os.path.exists(path_fon):
                     logger.info('Found ' + path_fon)
+                elif os.path.exists(path_fon+'.zst'):
+                    logger.info('Found ' + path_fon + '.zst')
                 else:
                     logger.info(f'Transform FON ({method},{biotype})')
                     run_cmd(['fon_transform',
                              '--fon', string.Template(path_fon_local).substitute(biotype=biotype, version='1'),
                              '--method', method,
                              '--output', string.Template(path_fon_local).safe_substitute(biotype=method_name + '_' + biotype)], logger)
+
+        # Compress
+        if 'gene' in steps:
+            cmd = ['zstd', '--rm', '-T'+str(config['num_processor']), '-19']
+            path_annot = os.path.dirname(path_fon_local)
+            for f in os.listdir(path_annot):
+                if f.endswith('.fon1.json'):
+                    run_cmd(cmd + [os.path.join(path_annot, f)], logger)
 
         # Indexes
         for idxname, idxc in ft.indexes.idx2classes.items():
