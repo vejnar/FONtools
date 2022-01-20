@@ -328,11 +328,11 @@ def main(argv=None):
                              '--output', string.Template(path_fon_local).safe_substitute(biotype=method_name + '_' + biotype)], logger)
 
         # Compress
-        if 'gene' in steps:
+        if 'gene' in steps and config['compress']:
             cmd = ['zstd', '--rm', '-T'+str(config['num_processor']), '-19']
             path_annot = os.path.dirname(path_fon_local)
             for f in os.listdir(path_annot):
-                if f.endswith('.fon1.json'):
+                if f.startswith(species_abv) and f.endswith('.fon1.json') and f.find(config['release']) != -1:
                     run_cmd(cmd + [os.path.join(path_annot, f)], logger)
 
         # Indexes
