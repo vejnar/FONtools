@@ -88,12 +88,18 @@ def get_annot_longest(aset):
             mlen = l
     return aset[ilongest]
 
+def add_intron_to_features(features, exons_key='exons', introns_key='introns'):
+    for feat in features:
+        exons = feat[exons_key]
+        feat[introns_key] = [[exons[i][1], exons[i + 1][0]] for i in range(0, len(exons) - 1)]
+    return features
+
 def main(argv=None):
     if argv is None:
         argv = sys.argv
     parser = argparse.ArgumentParser(description='Transform FON file.')
     parser.add_argument('-f', '--fon', dest='fon', action='store', required=True, help='Input FON file.')
-    parser.add_argument('-m', '--method', dest='method', action='store', default='union', help='Fusion method (i.e. union, longest).')
+    parser.add_argument('-m', '--method', dest='method', action='store', default='union', help='Fusion method (i.e. union, longest, add_introns).')
     parser.add_argument('-o', '--output', dest='path_output', action='store', required=True, help='Path to output file(s) (comma separated).')
     args = parser.parse_args(argv[1:])
 
@@ -114,6 +120,9 @@ def main(argv=None):
         features = transform_per_gene(fon['features'], get_annot_longest)
         # Sort by transcript
         features.sort(key=lambda e: e['transcript_stable_id'])
+    elif args.method == 'add_introns':
+        # Add new key "introns" using key "exons"
+        features = add_intron_to_features(fon['features'])
 
     # Path to output
     if args.path_output.find('$') != -1:
