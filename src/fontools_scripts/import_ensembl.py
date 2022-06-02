@@ -45,8 +45,8 @@ def main(argv=None):
     parser.add_argument('-x', '--skip_rest_cache', dest='skip_rest_cache', action='store_true', help='Don\'t use REST cache.')
     parser.add_argument('-t', '--steps', dest='steps', action='store', default='all', help='Get all or gg (=genome,gene) or genome,gene,bowtie2,star (comma separated).')
     parser.add_argument('-u', '--ucsc_naming', dest='ucsc_naming', action='store_true', default=False, help='Convert to UCSC chromosome/scaffold naming.')
-    parser.add_argument('-g', '--import_go', dest='import_go', action='store_true', default=False, help='Import Gene Ontology.')
-    parser.add_argument('-z', '--compress', dest='compress', action='store_true', default=False, help='Compress output when possible.')
+    parser.add_argument('-g', '--import_go', '--fontools_import_go', dest='fontools_import_go', action='store_true', default=False, help='Import Gene Ontology.')
+    parser.add_argument('-z', '--compress', '--fontools_compress', dest='fontools_compress', action='store_true', default=False, help='Compress output when possible.')
     parser.add_argument('-p', '--processor', dest='num_processor', action='store', type=int, default=1, help='Number of processor')
     parser.add_argument('--path_config', dest='path_config', action='store', help='Path to config')
     args = parser.parse_args(argv[1:])
@@ -109,7 +109,7 @@ def main(argv=None):
             if idxname in steps:
                 idx = idxc()
                 exes.append(idx.get_exe())
-        if config['compress']:
+        if config['fontools_compress']:
             exes.append('zstd')
     check_exe(exes)
 
@@ -208,7 +208,7 @@ def main(argv=None):
                     ft.remote.rget(url_protocol + url_path + p, cwd=config['fontools_path_download'])
 
             # Download GO
-            if config['import_go']:
+            if config['fontools_import_go']:
                 path_species_db = source.get_species_database_path(url_path, species, config['release'])
                 path_go_db = source.get_ontology_database_path(config['release'])
                 for path_db, table in [(path_species_db, 'transcript'),
@@ -301,7 +301,7 @@ def main(argv=None):
                 if config['ucsc_naming']:
                     cmd.append('--ucsc_names')
                 # Add GO annotation
-                if config['import_go']:
+                if config['fontools_import_go']:
                     cmd.extend(['--table_transcript', os.path.join(config['fontools_path_download'], path_species_db, 'transcript.txt.gz'),
                                 '--table_object_xref', os.path.join(config['fontools_path_download'], path_species_db, 'object_xref.txt.gz'),
                                 '--table_xref', os.path.join(config['fontools_path_download'], path_species_db, 'xref.txt.gz'),
@@ -328,7 +328,7 @@ def main(argv=None):
                              '--output', string.Template(path_fon_local).safe_substitute(biotype=method_name + '_' + biotype)], logger)
 
         # Compress
-        if 'gene' in steps and config['compress']:
+        if 'gene' in steps and config['fontools_compress']:
             cmd = ['zstd', '--rm', '-T'+str(config['num_processor']), '-19']
             path_annot = os.path.dirname(path_fon_local)
             for f in os.listdir(path_annot):
