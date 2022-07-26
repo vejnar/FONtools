@@ -1,4 +1,4 @@
-# <img src="https://git.sr.ht/~vejnar/FONtools/blob/master/img/logo.webp" alt="FONtools" width="45%" />
+# <img src="https://git.sr.ht/~vejnar/FONtools/blob/main/img/logo.webp" alt="FONtools" width="45%" />
 
 FONtools combines:
 * The new FON (Feature Object Notation) format to store genomic annotations based on [JSON](https://en.wikipedia.org/wiki/JSON)
