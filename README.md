@@ -1,4 +1,4 @@
-# ![FONtools](doc/logo.svg)
+# <img src="https://git.sr.ht/~vejnar/FONtools/blob/master/img/logo.webp" alt="FONtools" width="45%" />
 
 FONtools combines:
 * The new FON (Feature Object Notation) format to store genomic annotations based on [JSON](https://en.wikipedia.org/wiki/JSON)
@@ -152,8 +152,8 @@ Annotations are imported using `fon_import`, then `fon_transform` is used:
 * To create FON files restricted to a biotype, for example *protein coding* transcripts,
 * To create FON files selecting the longest isoform of each gene,
 * To create "metagene" FON files obtained by merging all isoforms of a gene together. Example of how a metagene is obtained from 3 isoforms:
-    
-    ![Metagene](doc/metagene.svg)
+
+    ![Metagene](img/metagene.webp)
 
     These "metagenes" can be used for counting HTS reads per gene, where reads mapping to any isoforms will map to the metagene.
 
