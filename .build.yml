@@ -1,0 +1,36 @@
+image: archlinux
+oauth: git.sr.ht/OBJECTS:RW git.sr.ht/REPOSITORIES:RO git.sr.ht/PROFILE:RO
+packages:
+    - hut
+    - python-build
+    - twine
+sources:
+    - git@git.sr.ht:~vejnar/FONtools
+environment:
+    repo: FONtools
+secrets:
+    - 0fa4be0f-f0ac-4763-855d-51d208629cfe # PyPI token
+tasks:
+    - archive-tag: |
+        cd $repo
+        tag=$(git describe --exact-match 2>/dev/null || true)
+        if [ -z "$tag" ]; then
+            echo "Current commit is not a tag; abort task"
+            exit 0
+        fi
+
+        # Publish archive
+        version=$(echo "$tag" | tr -d 'v')
+        git archive "v$version" -o "$repo-$version.tar.gz"
+        hut git artifact upload --rev "$tag" "$repo-$version.tar.gz"
+    - pypi-tag: |
+        cd $repo
+        tag=$(git describe --exact-match 2>/dev/null || true)
+
+        # Publish to PyPI
+        set +x
+        python3 -m build --sdist
+        TWINE_USERNAME="__token__" \
+        TWINE_PASSWORD="$(cat ~/.pypi_token)" \
+        twine upload dist/*tar.gz
+        set -x
