@@ -1,16 +1,16 @@
 image: archlinux
 oauth: git.sr.ht/OBJECTS:RW git.sr.ht/REPOSITORIES:RO git.sr.ht/PROFILE:RO
-packages:
-    - hut
-    - python-build
-    - twine
 sources:
     - git@git.sr.ht:~vejnar/FONtools
 environment:
     repo: FONtools
+    packages: hut python-build twine
 secrets:
     - 0fa4be0f-f0ac-4763-855d-51d208629cfe # PyPI token
 tasks:
+    - update: |
+        sudo pacman -Sy --noconfirm --noprogressbar archlinux-keyring
+        sudo pacman -Syu --noconfirm --noprogressbar $packages
     - archive-tag: |
         cd $repo
         tag=$(git describe --exact-match 2>/dev/null || true)
