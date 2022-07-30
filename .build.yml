@@ -26,6 +26,10 @@ tasks:
     - pypi-tag: |
         cd $repo
         tag=$(git describe --exact-match 2>/dev/null || true)
+        if [ -z "$tag" ]; then
+            echo "Current commit is not a tag; abort task"
+            exit 0
+        fi
 
         # Publish to PyPI
         set +x
