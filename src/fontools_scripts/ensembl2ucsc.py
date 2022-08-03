@@ -28,7 +28,11 @@ def main(argv=None):
     # Input
     if args.input == '-':
         fin = sys.stdin
-        input_format = args.format
+        if args.format is None:
+            print('ERROR: Format required with stdin')
+            return 1
+        else:
+            input_format = args.format
     else:
         if args.format is None:
             if args.input.endswith('.fa') or args.input.endswith('.fa.gz'):
@@ -37,6 +41,12 @@ def main(argv=None):
                 input_format = 'gff3'
             elif args.input.endswith('.tab') or args.input.endswith('.tab.gz'):
                 input_format = 'tab'
+        else:
+            if args.format in ('fasta', 'gff3', 'tab'):
+                input_format = args.format
+            else:
+                print(f'ERROR: Unknown format {args.format}')
+                return 1
         if args.input.endswith('.gz'):
             fin = gzip.open(args.input, 'rt')
         else:
