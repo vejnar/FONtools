@@ -14,6 +14,7 @@ import json
 import sys
 
 import pyfaidx
+import zstandard as zstd
 
 import fontools as ft
 import pyfnutils as pfu
@@ -60,7 +61,10 @@ def main(argv=None):
 
     # Parsing FON
     logger.info('Open FON')
-    fon = json.load(open(args.input_fon))
+    if args.input_fon.endswith('.zst'):
+        fon = json.load(zstd.open(args.input_fon))
+    else:
+        fon = json.load(open(args.input_fon))
 
     # Group by chromosome
     coords_by_chrom = group_coords_by_chrom(fon['features'], args.key, args.extension, args.exterior_extension)
