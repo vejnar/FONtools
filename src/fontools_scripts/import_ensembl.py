@@ -13,7 +13,6 @@ import argparse
 import json
 import os
 import string
-import shutil
 import subprocess
 import sys
 
@@ -24,11 +23,6 @@ import pyfnutils.log
 def run_cmd(cmd, logger, cwd=None):
     logger.info('Start ' + str(cmd))
     subprocess.run(cmd, cwd=cwd, check=True)
-
-def check_exe(names):
-    for name in names:
-        if shutil.which(name) == None:
-            raise FileNotFoundError(name+' missing')
 
 def main(argv=None):
     if argv is None:
@@ -112,7 +106,7 @@ def main(argv=None):
                 exes.append(idx.get_exe())
         if config['fontools_compress']:
             exes.append('zstd')
-    check_exe(exes)
+    ft.utils.check_exe(exes)
 
     # Source
     if config['division'] == 'ensembl':

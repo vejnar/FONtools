@@ -9,6 +9,12 @@
 #
 
 import itertools
+import shutil
+
+def check_exe(names):
+    for name in names:
+        if shutil.which(name) == None:
+            raise FileNotFoundError(name+' missing')
 
 def strand2direction(strand):
     if strand == '-':
