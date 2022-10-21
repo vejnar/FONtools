@@ -40,6 +40,7 @@ def main(argv=None):
     parser.add_argument('-l', '--path_log', dest='path_log', action='store', help='Log path.')
     parser.add_argument('-n', '--division', dest='division', action='store', default='ensembl', help='Ensembl division (ensembl or ensembl_genomes).')
     parser.add_argument('-s', '--species', dest='species', action='store', required=True, help='Ensembl species name: all, list or name (e.g. danio_rerio) (comma separated).')
+    parser.add_argument('--species_abv', dest='species_abv', action='store', required=True, help='Species name abbreviation: pair(s) of species_name,species_abv (e.g. danio_rerio,danrer) (comma separated).')
     parser.add_argument('-r', '--release', dest='release', action='store', required=True, help='Ensembl release.')
     parser.add_argument('-a', '--path_rest_cache', dest='path_rest_cache', action='store', help='Path to REST cache.')
     parser.add_argument('-x', '--skip_rest_cache', dest='skip_rest_cache', action='store_true', help='Don\'t use REST cache.')
@@ -74,7 +75,7 @@ def main(argv=None):
     for a, v in vargs.items():
         if v is not None and (a not in config or v != parser.get_default(a)):
             config[a] = v
-        if a in ['steps', 'species']:
+        if a in ['steps', 'species', 'species_abv']:
             if v is None:
                 config[a] = []
             else:
@@ -146,6 +147,12 @@ def main(argv=None):
     else:
         lspecies = config['species']
 
+    # Species abbreviation
+    if 'species_abv' in config:
+        species_abvs = {config['species_abv'][i]: config['species_abv'][i+1] for i in range(0, len(config['species_abv'])-1, 2)}
+    else:
+        species_abvs = None
+
     # Log
     if 'path_log' in config:
         path_log = config['path_log']
@@ -159,7 +166,10 @@ def main(argv=None):
 
     for species in lspecies:
         logger.info(f"Starting ({species},{config['release']})")
-        species_abv = ft.naming.get_species_abv(species)
+        if species_abvs is None or species not in species_abvs:
+            species_abv = ft.naming.get_species_abv(species)
+        else:
+            species_abv = species_abvs[species]
 
         # Get remote path and info
         url_protocol, url_path, taxon, path_genome_root, path_genome_file, genome_version, genome_level = source.get_genome_info(species, config['release'])
