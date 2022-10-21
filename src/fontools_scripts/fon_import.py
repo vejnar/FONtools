@@ -15,6 +15,7 @@ import gzip
 import json
 import os
 import string
+import subprocess
 import sys
 import tempfile
 
@@ -92,6 +93,8 @@ def main(argv=None):
     parser.add_argument('-m', '--path_mapping', dest='path_mapping', action='store', help='Path to chromosome name mapping.')
     parser.add_argument('-l', '--filter', dest='source_filter', action='append', help='Filter source (ex: ensembl, havana).')
     parser.add_argument('-x', '--exclude_no_seq', dest='exclude_no_seq', action='store_true', help='Exclude transcript without cDNA sequence.')
+    parser.add_argument('-z', '--compress', dest='compress', action='store_true', default=False, help='Compress output.')
+    parser.add_argument('-p', '--processor', dest='num_processor', action='store', type=int, default=1, help='Number of processor')
     parser.add_argument('--bed_name_as_id', dest='bed_name_as_id', action='store_true', help='BED: Use name (BED 4th column) as ID.')
     parser.add_argument('--bed_feature_id', dest='bed_feature_id', action='store', default='transcript_stable_id', help='BED: Feature ID (default:transcript_stable_id).')
     parser.add_argument('--bed_interval_name', dest='bed_interval_name', action='store', default='exons', help='BED: Interval name (default:exons).')
@@ -105,6 +108,10 @@ def main(argv=None):
     # Logging
     logger = pfu.log.define_root_logger('fon_import')
     logger.info('Start')
+
+    # Check executable(s)
+    if args.compress:
+        ft.utils.check_exe(['zstd'])
 
     logger.info('Get transcript structure')
     if args.path_annot.find('.gff3') != -1:
@@ -151,6 +158,8 @@ def main(argv=None):
         if args.output_format == 'fon' or args.output_format == 'fon1':
             logger.info('FON1 export to '+path_output[0])
             json.dump({'fon_version': 1, 'features': ts}, open(path_output[0], 'wt'))
+            if args.compress:
+                subprocess.run(['zstd', '--rm', '-T'+str(args.num_processor), '-19', path_output[0]], check=True)
 
 if __name__ == '__main__':
     sys.exit(main())
