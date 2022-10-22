@@ -34,7 +34,7 @@ def main(argv=None):
     parser.add_argument('-l', '--path_log', dest='path_log', action='store', help='Log path.')
     parser.add_argument('-n', '--division', dest='division', action='store', default='ensembl', help='Ensembl division (ensembl or ensembl_genomes).')
     parser.add_argument('-s', '--species', dest='species', action='store', required=True, help='Ensembl species name: all, list or name (e.g. danio_rerio) (comma separated).')
-    parser.add_argument('--species_abv', dest='species_abv', action='store', required=True, help='Species name abbreviation: pair(s) of species_name,species_abv (e.g. danio_rerio,danrer) (comma separated).')
+    parser.add_argument('--species_abv', dest='species_abv', action='store', help='Species name abbreviation: pair(s) of species_name,species_abv (e.g. danio_rerio,danrer) (comma separated).')
     parser.add_argument('-r', '--release', dest='release', action='store', required=True, help='Ensembl release.')
     parser.add_argument('-a', '--path_rest_cache', dest='path_rest_cache', action='store', help='Path to REST cache.')
     parser.add_argument('-x', '--skip_rest_cache', dest='skip_rest_cache', action='store_true', help='Don\'t use REST cache.')
