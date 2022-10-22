@@ -72,6 +72,8 @@ def get_transcripts_gff3(path_annot, convert_ucsc=False, path_mapping=None, data
         for l in f.readlines():
             if l.startswith('#'):
                 continue
+            if len(l.strip()) == 0:
+                continue
             seqname, source, feature, start, end, score, strand, phase, attributes_raw = l.strip().split('\t')
             if filter_source is None or len(filter_source) == 0 or source in filter_source:
                 attributes = gff_parse_attributes(attributes_raw)
@@ -87,7 +89,7 @@ def get_transcripts_gff3(path_annot, convert_ucsc=False, path_mapping=None, data
                             gene_id = attributes['gene_id']
                             gene_biotype_column = 'biotype'
                         elif data_source == 'xenbase':
-                            gene_id = attributes['ID']
+                            gene_id = attributes['ID'].split('-')[1]
                             gene_biotype_column = 'gene_biotype'
                         else:
                             gene_id = attributes['ID']
@@ -101,11 +103,13 @@ def get_transcripts_gff3(path_annot, convert_ucsc=False, path_mapping=None, data
                 if 'Parent' in attributes:
                     if data_source == 'ensembl':
                         parent_id = attributes['Parent'].split(':')[1]
+                    elif data_source == 'xenbase':
+                        parent_id = attributes['Parent'].split('-')[1]
                     else:
                         parent_id = attributes['Parent']
                     # Transcript
                     if parent_id in genes and parent_id not in wo_transcript_genes:
-                        if data_source == 'ensembl' and 'transcript_id' in attributes:
+                        if (data_source == 'ensembl' or data_source == 'xenbase') and 'transcript_id' in attributes:
                             transcript_id = attributes['transcript_id']
                         elif feature == 'exon' or feature == 'CDS':
                             transcript_id = 't' + str(transcript_num_id)
