@@ -11,6 +11,8 @@
 import gzip
 import urllib.parse
 
+import zstandard as zstd
+
 from . import ensembl
 from . import utils
 
@@ -44,6 +46,8 @@ def get_transcripts_gff3(path_annot, convert_ucsc=False, path_mapping=None, data
     for p in path_annot:
         if p.endswith('.gz'):
             fgff.append(gzip.open(p, 'rt'))
+        elif p.endswith('.zst'):
+            fgff.append(zstd.open(p, 'rt'))
         else:
             fgff.append(open(p, 'rt'))
 

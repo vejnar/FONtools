@@ -13,7 +13,10 @@ import argparse
 import json
 import os
 import string
+import subprocess
 import sys
+
+import zstandard as zstd
 
 import fontools as ft
 import pyfnutils as pfu
@@ -23,7 +26,7 @@ def main(argv=None):
     if argv is None:
         argv = sys.argv
     parser = argparse.ArgumentParser(description='Merge FON/GFF/FASTA files.')
-    parser.add_argument('-p', '--species_prefix', dest='species_prefix', action='store', help='Species prefix (comma separated).')
+    parser.add_argument('-x', '--species_prefix', dest='species_prefix', action='store', help='Species prefix (comma separated).')
     parser.add_argument('-f', '--input_fasta', dest='input_fasta', action='store', help='Path to input FASTA file(s) (comma separated).')
     parser.add_argument('-o', '--output_fasta', dest='output_fasta', action='store', help='Path to output FASTA file.')
     parser.add_argument('-g', '--input_gff', dest='input_gff', action='store', help='Path to input GTF file(s) (comma separated).')
@@ -33,11 +36,17 @@ def main(argv=None):
     parser.add_argument('-y', '--fon_version', dest='fon_version', action='store', default='1', help='FON version (comma separated).')
     parser.add_argument('-m', '--fon_method', dest='fon_method', action='store', default='', help='FON Fusion method: union2gene, longest (comma separated).')
     parser.add_argument('-b', '--fon_biotype', dest='fon_biotype', action='store', default='', help='FON biotype: all, protein_coding (comma separated).')
+    parser.add_argument('-z', '--compress', dest='compress', action='store_true', default=False, help='Compress output.')
+    parser.add_argument('-p', '--processor', dest='num_processor', action='store', type=int, default=1, help='Number of processor')
     args = parser.parse_args(argv[1:])
 
     # Logging
     logger = pfu.log.define_root_logger('merge')
     logger.info('Start')
+
+    # Check executable(s)
+    if args.compress:
+        ft.utils.check_exe(['zstd'])
 
     # Parse arguments
     if args.species_prefix is not None:
@@ -134,7 +143,10 @@ def main(argv=None):
                             fin = p.substitute(version=fon_version, method=fon_method, biotype=fon_biotype)
                         else:
                             fin = p
-                        features = json.load(open(fin))['features']
+                        if fin.endswith('.zst'):
+                            features = json.load(zstd.open(fin))['features']
+                        else:
+                            features = json.load(open(fin))['features']
                         if fon_version == '1':
                             for j in range(len(features)):
                                 features[j]['chrom'] = species_prefix[i] + features[j]['chrom'] 
@@ -153,6 +165,9 @@ def main(argv=None):
                         logger.info('Merging: ' + f)
                     if fon_version == '1':
                         json.dump({'fon_version': 1, 'features': merged_features}, open(fout, 'wt'))
+                    # Compress
+                    if args.compress:
+                        subprocess.run(['zstd', '--rm', '-T'+str(args.num_processor), '-19', fout], check=True)
 
 if __name__ == '__main__':
     sys.exit(main())

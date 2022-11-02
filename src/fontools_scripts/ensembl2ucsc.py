@@ -13,6 +13,8 @@ import argparse
 import gzip
 import sys
 
+import zstandard as zstd
+
 import fontools as ft
 
 def main(argv=None):
@@ -35,11 +37,11 @@ def main(argv=None):
             input_format = args.format
     else:
         if args.format is None:
-            if args.input.endswith('.fa') or args.input.endswith('.fa.gz'):
+            if args.input.endswith('.fa') or args.input.endswith('.fa.gz') or args.input.endswith('.fa.zst'):
                 input_format = 'fasta'
-            elif args.input.endswith('.gff3') or args.input.endswith('.gff3.gz'):
+            elif args.input.endswith('.gff3') or args.input.endswith('.gff3.gz') or args.input.endswith('.gff3.zst'):
                 input_format = 'gff3'
-            elif args.input.endswith('.tab') or args.input.endswith('.tab.gz'):
+            elif args.input.endswith('.tab') or args.input.endswith('.tab.gz') or args.input.endswith('.tab.zst'):
                 input_format = 'tab'
         else:
             if args.format in ('fasta', 'gff3', 'tab'):
@@ -49,6 +51,8 @@ def main(argv=None):
                 return 1
         if args.input.endswith('.gz'):
             fin = gzip.open(args.input, 'rt')
+        elif args.input.endswith('.zst'):
+            fin = zstd.open(args.input, 'rt')
         else:
             fin = open(args.input, 'rt')
 
@@ -69,6 +73,8 @@ def main(argv=None):
     if args.output is None:
         if args.input.endswith('.gz'):
             fout = open(args.input[:-3] + '.ucsc', 'wt')
+        elif args.input.endswith('.zst'):
+            fout = open(args.input[:-4] + '.ucsc', 'wt')
         else:
             fout = open(args.input + '.ucsc', 'wt')
     elif args.output == '-':

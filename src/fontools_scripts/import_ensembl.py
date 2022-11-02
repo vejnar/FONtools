@@ -91,6 +91,8 @@ def main(argv=None):
         if not os.path.exists(config[p]):
             print(f'ERROR: {config[p]} not found')
             return 1
+        # Make sure path is absolute
+        config[p] = os.path.abspath(config[p])
     # Check executables
     exes = ['wget']
     if len(config['species']) > 0 and config['species'][0] != 'list':
@@ -181,6 +183,10 @@ def main(argv=None):
         path_gff_local = os.path.join(config['fontools_path_main'], 'annots', f"{species_abv}_cdna_all_{config['division']}{config['release']}{suffix}.gff3")
         path_genome_chrom_length_local = os.path.join(config['fontools_path_main'], 'annots', f"{species_abv}_genome_all_{config['division']}_{genome_version_std}{suffix}_chrom_length.tab")
         path_fon_local = os.path.join(config['fontools_path_main'], 'annots', f"{species_abv}_cdna_${{biotype}}_{config['division']}{config['release']}{suffix}.fon${{version}}.json")
+        # Local path extensions
+        genome_ext = ''
+        gff_ext = ''
+        fon_ext = ''
 
         # Create main folder
         if not os.path.exists(config['fontools_path_main']):
@@ -231,7 +237,13 @@ def main(argv=None):
         for s, pr, p, pl in [('genome', 'seqs', path_genome, path_genome_local), ('gene', 'annots', path_gff, path_gff_local)]:
             if s in steps:
                 if os.path.exists(pl):
-                    logger.info('Found ' + pl)
+                    logger.info(f'Found {pl}')
+                elif os.path.exists(pl + '.zst'):
+                    logger.info(f'Found {pl}.zst')
+                    if s == 'genome':
+                        genome_ext = '.zst'
+                    elif s == 'gene':
+                        gff_ext = '.zst'
                 else:
                     # Output folder
                     if not os.path.exists(os.path.join(config['fontools_path_main'], pr)):
@@ -258,6 +270,10 @@ def main(argv=None):
                         elif s == 'gene':
                             run_cmd(['cp', p, pl + '.gz'], logger)
                             run_cmd(['gzip', '-d', pl + '.gz'], logger)
+                            if config['fontools_compress']:
+                                run_cmd(['zstd', '--rm', '-T'+str(config['num_processor']), '-19', pl], logger)
+                                # Add GFF extension
+                                gff_ext = '.zst'
 
         # Chromosome index and lengths
         if 'genome' in steps:
@@ -287,13 +303,14 @@ def main(argv=None):
         if 'gene' in steps:
             path_fon = string.Template(path_fon_local).substitute(biotype='all', version='1')
             if os.path.exists(path_fon):
-                logger.info('Found ' + path_fon)
-            elif os.path.exists(path_fon+'.zst'):
-                logger.info('Found ' + path_fon + '.zst')
+                logger.info(f'Found {path_fon}')
+            elif os.path.exists(path_fon + '.zst'):
+                logger.info(f'Found {path_fon}.zst')
+                fon_ext = '.zst'
             else:
                 logger.info('Importing annotation')
                 cmd = ['fon_import',
-                       '--annotation', os.path.join(config['fontools_path_download'], url_path, path_gff),
+                       '--annotation', path_gff_local + gff_ext,
                        '--data_source', 'ensembl',
                        '--fasta', os.path.join(config['fontools_path_download'], url_path, path_cdna),
                        '--fasta', os.path.join(config['fontools_path_download'], url_path, path_ncrna),
@@ -304,6 +321,12 @@ def main(argv=None):
                        '--output_format', 'fon']
                 if config['ucsc_naming']:
                     cmd.append('--ucsc_names')
+                if config['fontools_compress']:
+                    cmd.append('--compress')
+                    cmd.append('--processor')
+                    cmd.append(str(config['num_processor']))
+                    # Add FON extension
+                    fon_ext = '.zst'
                 # Add GO annotation
                 if config['fontools_import_go']:
                     cmd.extend(['--table_transcript', os.path.join(config['fontools_path_download'], path_species_db, 'transcript.txt.gz'),
@@ -319,25 +342,23 @@ def main(argv=None):
                                                  ('protein_coding', 'longest', 'longest_transcript'),
                                                  ('all', 'union', 'union2gene'),
                                                  ('all', 'longest', 'longest_transcript')]:
-                path_fon = string.Template(path_fon_local).substitute(biotype=method_name + '_' + biotype, version='1')
-                if os.path.exists(path_fon):
-                    logger.info('Found ' + path_fon)
-                elif os.path.exists(path_fon+'.zst'):
-                    logger.info('Found ' + path_fon + '.zst')
+                path_fon_input = string.Template(path_fon_local).substitute(biotype=biotype, version='1') + fon_ext
+                path_fon_ouput = string.Template(path_fon_local).substitute(biotype=method_name + '_' + biotype, version='1')
+                if os.path.exists(path_fon_ouput):
+                    logger.info(f'Found {path_fon_ouput}')
+                elif os.path.exists(path_fon_ouput + '.zst'):
+                    logger.info(f'Found {path_fon_ouput}.zst')
                 else:
                     logger.info(f'Transform FON ({method},{biotype})')
-                    run_cmd(['fon_transform',
-                             '--fon', string.Template(path_fon_local).substitute(biotype=biotype, version='1'),
-                             '--method', method,
-                             '--output', string.Template(path_fon_local).safe_substitute(biotype=method_name + '_' + biotype)], logger)
-
-        # Compress
-        if 'gene' in steps and config['fontools_compress']:
-            cmd = ['zstd', '--rm', '-T'+str(config['num_processor']), '-19']
-            path_annot = os.path.dirname(path_fon_local)
-            for f in os.listdir(path_annot):
-                if f.startswith(species_abv) and f.endswith('.fon1.json') and f.find(config['release']) != -1:
-                    run_cmd(cmd + [os.path.join(path_annot, f)], logger)
+                    cmd = ['fon_transform',
+                           '--fon', path_fon_input,
+                           '--method', method,
+                           '--output', string.Template(path_fon_local).safe_substitute(biotype=method_name + '_' + biotype)]
+                    if config['fontools_compress']:
+                        cmd.append('--compress')
+                        cmd.append('--processor')
+                        cmd.append(str(config['num_processor']))
+                    run_cmd(cmd, logger)
 
         # Indexes
         for idxname, idxc in ft.indexes.idx2classes.items():
@@ -351,7 +372,8 @@ def main(argv=None):
                     # Output folder
                     os.makedirs(path_idx_local)
                     # Create index
-                    run_cmd(idx.get_create_cmd(path_genome_local, path_gff_local, path_genome_chrom_length_local, config['num_processor']), logger, cwd=path_idx_local)
+                    for cmd in idx.get_create_cmds(path_genome_local, path_gff_local + gff_ext, path_genome_chrom_length_local, config['num_processor']):
+                        run_cmd(cmd, logger, cwd=path_idx_local)
 
 if __name__ == '__main__':
     sys.exit(main())

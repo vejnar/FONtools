@@ -10,6 +10,8 @@
 
 import gzip
 
+import zstandard as zstd
+
 from . import ensembl
 from . import utils
 
@@ -25,6 +27,8 @@ def get_transcripts_bed6(path_annot, convert_ucsc=False, path_mapping=None, bed_
     for p in path_annot:
         if p.endswith('.gz'):
             fbed.append(gzip.open(p, 'rt'))
+        elif p.endswith('.zst'):
+            fbed.append(zstd.open(p, 'rt'))
         else:
             fbed.append(open(p, 'rt'))
 

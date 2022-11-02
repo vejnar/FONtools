@@ -14,7 +14,10 @@ import itertools
 import json
 import os
 import string
+import subprocess
 import sys
+
+import zstandard as zstd
 
 import fontools as ft
 import pyfnutils as pfu
@@ -101,15 +104,24 @@ def main(argv=None):
     parser.add_argument('-f', '--fon', dest='fon', action='store', required=True, help='Input FON file.')
     parser.add_argument('-m', '--method', dest='method', action='store', default='union', help='Fusion method (i.e. union, longest, add_introns).')
     parser.add_argument('-o', '--output', dest='path_output', action='store', required=True, help='Path to output file(s) (comma separated).')
+    parser.add_argument('-z', '--compress', dest='compress', action='store_true', default=False, help='Compress output.')
+    parser.add_argument('-p', '--processor', dest='num_processor', action='store', type=int, default=1, help='Number of processor')
     args = parser.parse_args(argv[1:])
 
     # Logging
     logger = pfu.log.define_root_logger('fon_' + args.method)
     logger.info('Start')
 
+    # Check executable(s)
+    if args.compress:
+        ft.utils.check_exe(['zstd'])
+
     # Parsing FON
     logger.info('Open FON')
-    fon = json.load(open(args.fon))
+    if args.fon.endswith('.zst'):
+        fon = json.load(zstd.open(args.fon))
+    else:
+        fon = json.load(open(args.fon))
 
     logger.info(f'Transform FON (method:{args.method})')
     if args.method == 'union':
@@ -127,12 +139,15 @@ def main(argv=None):
     # Path to output
     if args.path_output.find('$') != -1:
         ot = string.Template(args.path_output)
-        path_output = [ot.substitute(version='1'), ot.substitute(version='2')]
+        path_output = [ot.substitute(version='1')]
     else:
         path_output = args.path_output.split(',')
     # Write
     logger.info('FON1 export to '+path_output[0])
     json.dump({'fon_version': 1, 'features': features}, open(path_output[0], 'wt'))
+    # Compress
+    if args.compress:
+        subprocess.run(['zstd', '--rm', '-T'+str(args.num_processor), '-19', path_output[0]], check=True)
 
 if __name__ == '__main__':
     sys.exit(main())
