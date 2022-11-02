@@ -4,7 +4,7 @@ sources:
     - git@git.sr.ht:~vejnar/FONtools
 environment:
     repo: FONtools
-    packages: hut python-build twine
+    packages: hut python-build twine python-rich
 secrets:
     - 0fa4be0f-f0ac-4763-855d-51d208629cfe # PyPI token
 tasks:
