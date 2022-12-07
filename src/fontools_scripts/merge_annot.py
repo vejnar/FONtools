@@ -121,14 +121,18 @@ def main(argv=None):
     # GFF
     if args.output_gff is not None:
         logger.info('GFF: ' + args.output_gff)
-        for i, p in enumerate(input_gffs):
-            logger.info('Merging: ' + p)
-            with open(p) as f, open(args.output_gff, 'at') as fout:
-                for l in f:
-                    if l.startswith('#'):
-                        fout.write(l)
-                    else:
-                        fout.write(species_prefix[i] + l)
+        with open(args.output_gff, 'wt') as fout:
+            for i, p in enumerate(input_gffs):
+                logger.info('Merging: ' + p)
+                with zstd.open(p, 'rt') if p.endswith('.zst') else open(p, 'rt') as f:
+                    for l in f:
+                        if l.startswith('#'):
+                            fout.write(l)
+                        else:
+                            fout.write(species_prefix[i] + l)
+        # Compress
+        if args.compress:
+            subprocess.run(['zstd', '--rm', '-T'+str(args.num_processor), '-19', args.output_gff], check=True)
 
     # FON
     if output_fon is not None:
