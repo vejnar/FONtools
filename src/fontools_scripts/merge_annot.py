@@ -142,6 +142,7 @@ def main(argv=None):
                     # Input
                     fins = []
                     merged_features = None
+                    merged_assembly = None
                     for i, p in enumerate(input_fons):
                         if isinstance(p, string.Template):
                             fin = p.substitute(version=fon_version, method=fon_method, biotype=fon_biotype)
@@ -151,14 +152,24 @@ def main(argv=None):
                             fon = json.load(zstd.open(fin))
                         else:
                             fon = json.load(open(fin))
-                        features = fon['features']
                         if fon_version == '1':
+                            # Merge features
+                            features = fon['features']
                             for j in range(len(features)):
-                                features[j]['chrom'] = species_prefix[i] + features[j]['chrom'] 
+                                features[j]['chrom'] = species_prefix[i] + features[j]['chrom']
                             if merged_features is None:
                                 merged_features = features
                             else:
                                 merged_features.extend(features)
+                            # Merge assembly
+                            if 'assembly' in fon:
+                                assembly = fon['assembly']
+                                for j in range(len(assembly)):
+                                    assembly[j]['name'] = species_prefix[i] + assembly[j]['name']
+                                if merged_assembly is None:
+                                    merged_assembly = assembly
+                                else:
+                                    merged_assembly.extend(assembly)
                         fins.append(fin)
                     # Output
                     if isinstance(output_fon, string.Template):
@@ -168,10 +179,10 @@ def main(argv=None):
                     logger.info('FON: ' + fout)
                     for f in fins:
                         logger.info('Merging: ' + f)
-                        new_fon = {}
-                        for k in fon.keys():
-                            if k != 'features':
-                                new_fon[k] = fon[k]
+                    if fon_version == '1':
+                        new_fon = {'fon_version': 1}
+                        if merged_assembly is not None:
+                            new_fon['assembly'] = merged_assembly
                         new_fon['features'] = merged_features
                         json.dump(new_fon, open(fout, 'wt'))
                     # Compress
