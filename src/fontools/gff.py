@@ -65,6 +65,7 @@ def get_transcripts_gff3(path_annot, convert_ucsc=False, path_mapping=None, data
                         name_mapping[fields[0]] = fields[1]
 
     # Init.
+    assembly = []
     genes = {}
     transcripts = {}
     # GFF3 specifications authorize exon and CDS to be directly the child of a gene (ie. without an mRNA)
@@ -81,6 +82,9 @@ def get_transcripts_gff3(path_annot, convert_ucsc=False, path_mapping=None, data
             seqname, source, feature, start, end, score, strand, phase, attributes_raw = l.strip().split('\t')
             if filter_source is None or len(filter_source) == 0 or source in filter_source:
                 attributes = gff_parse_attributes(attributes_raw)
+                # Assembly
+                if feature == 'chromosome' or feature == 'scaffold':
+                    assembly.append({'name': gff_parse_seqname(seqname, convert_ucsc, name_mapping), 'level': feature, 'length': int(end)})
                 # Gene (i.e. top of target hierarchy)
                 if 'ID' in attributes:
                     # Parse ID type
@@ -208,6 +212,10 @@ def get_transcripts_gff3(path_annot, convert_ucsc=False, path_mapping=None, data
             t['cds_exons_frame_on_transcript'] = []
         t['utr3_exons_on_transcript'], tlength = utils.get_exons_on_transcript(t['utr3_exons'], t['strand'], tlength)
 
-    # Sorting transcripts
+    # Sort assembly
+    assembly.sort(key=lambda a: (a['level'], a['name']))
+
+    # Sort transcripts
     transcripts.sort(key=lambda t: t['transcript_stable_id'])
-    return transcripts
+
+    return assembly, transcripts

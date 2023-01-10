@@ -114,8 +114,9 @@ def main(argv=None):
         ft.utils.check_exe(['zstd'])
 
     logger.info('Get transcript structure')
+    assembly = []
     if args.path_annot.find('.gff3') != -1:
-        transcripts = ft.gff.get_transcripts_gff3(args.path_annot.split(','), args.convert_ucsc_names, args.path_mapping, args.data_source, args.source_filter)
+        assembly, transcripts = ft.gff.get_transcripts_gff3(args.path_annot.split(','), args.convert_ucsc_names, args.path_mapping, args.data_source, args.source_filter)
     elif args.path_annot.find('.bed') != -1:
         transcripts = ft.bed.get_transcripts_bed6(args.path_annot.split(','), args.convert_ucsc_names, args.path_mapping, args.bed_name_as_id, args.bed_feature_id, args.bed_interval_name)
     else:
@@ -151,13 +152,21 @@ def main(argv=None):
         # Apply filter
         if bt == 'all':
             ts = transcripts
+            ab = assembly
         else:
             ts = [t for t in transcripts if t['transcript_biotype'] == bt]
+            # Apply filter on assembly
+            ab_filter = set([t['chrom'] for t in transcripts])
+            ab = [a for a in assembly if a['name'] in ab_filter]
 
         # Save FON1
         if args.output_format == 'fon' or args.output_format == 'fon1':
             logger.info('FON1 export to '+path_output[0])
-            json.dump({'fon_version': 1, 'features': ts}, open(path_output[0], 'wt'))
+            fon = {'fon_version': 1}
+            if len(ab) > 0:
+                fon['assembly'] = ab
+            fon['features'] = ts
+            json.dump(fon, open(path_output[0], 'wt'))
             if args.compress:
                 subprocess.run(['zstd', '--rm', '-T'+str(args.num_processor), '-19', path_output[0]], check=True)
 

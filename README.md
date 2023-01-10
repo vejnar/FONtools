@@ -33,12 +33,29 @@ To overcome these limitations, FON format enables simple parsing and hierarchica
 
 ## FON1
 
-FON1 is the first version of the Feature Object Notation format. It stores features in a list, and each feature is a dictionary with a set of defined keys. New keys for each feature can be freely added or removed, none of them are required. Programs using specific key(s) should provide the option to select by their name which key(s) to use (for example the `--key` option of `fon_mask_fasta`).
+FON1 is the first version of the Feature Object Notation format. It stores features in a list. Each feature is a dictionary with a set of defined keys. New keys for each feature can be freely added or removed, none of them are required. Programs using specific key(s) should provide the option to select by their name which key(s) to use (for example the `--key` option of `fon_mask_fasta`). Chromosome and scaffolds can be described in the *assembly* key with their name, level and length.
 
 Example for one zebrafish transcript (one feature):
 ```json
 {
     "fon_version": 1,
+    "assembly": [
+        {
+            "name": "1",
+            "level": "chromosome",
+            "length": 59578282
+        },
+        {
+            "name": "2",
+            "level": "chromosome",
+            "length": 59640629
+        },
+        {
+            "name": "KN149708.1",
+            "level": "scaffold",
+            "length": 20567
+        }
+    ],
     "features": [
         {
             "transcript_stable_id": "ENSDART00000171909",

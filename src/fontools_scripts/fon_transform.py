@@ -144,7 +144,12 @@ def main(argv=None):
         path_output = args.path_output.split(',')
     # Write
     logger.info('FON1 export to '+path_output[0])
-    json.dump({'fon_version': 1, 'features': features}, open(path_output[0], 'wt'))
+    new_fon = {}
+    for k in fon.keys():
+        if k != 'features':
+            new_fon[k] = fon[k]
+    new_fon['features'] = features
+    json.dump(new_fon, open(path_output[0], 'wt'))
     # Compress
     if args.compress:
         subprocess.run(['zstd', '--rm', '-T'+str(args.num_processor), '-19', path_output[0]], check=True)

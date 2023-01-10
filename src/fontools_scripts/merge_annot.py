@@ -148,9 +148,10 @@ def main(argv=None):
                         else:
                             fin = p
                         if fin.endswith('.zst'):
-                            features = json.load(zstd.open(fin))['features']
+                            fon = json.load(zstd.open(fin))
                         else:
-                            features = json.load(open(fin))['features']
+                            fon = json.load(open(fin))
+                        features = fon['features']
                         if fon_version == '1':
                             for j in range(len(features)):
                                 features[j]['chrom'] = species_prefix[i] + features[j]['chrom'] 
@@ -167,8 +168,12 @@ def main(argv=None):
                     logger.info('FON: ' + fout)
                     for f in fins:
                         logger.info('Merging: ' + f)
-                    if fon_version == '1':
-                        json.dump({'fon_version': 1, 'features': merged_features}, open(fout, 'wt'))
+                        new_fon = {}
+                        for k in fon.keys():
+                            if k != 'features':
+                                new_fon[k] = fon[k]
+                        new_fon['features'] = merged_features
+                        json.dump(new_fon, open(fout, 'wt'))
                     # Compress
                     if args.compress:
                         subprocess.run(['zstd', '--rm', '-T'+str(args.num_processor), '-19', fout], check=True)
