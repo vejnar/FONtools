@@ -84,7 +84,11 @@ def get_transcripts_gff3(path_annot, convert_ucsc=False, path_mapping=None, data
                 attributes = gff_parse_attributes(attributes_raw)
                 # Assembly
                 if feature == 'chromosome' or feature == 'scaffold':
-                    assembly.append({'name': gff_parse_seqname(seqname, convert_ucsc, name_mapping), 'level': feature, 'length': int(end)})
+                    assembly.append({
+                        'name': gff_parse_seqname(seqname, convert_ucsc, name_mapping),
+                        'level': feature,
+                        'length': int(end),
+                    })
                 # Gene (i.e. top of target hierarchy)
                 if 'ID' in attributes:
                     # Parse ID type
@@ -97,28 +101,33 @@ def get_transcripts_gff3(path_annot, convert_ucsc=False, path_mapping=None, data
                             gene_id = attributes['gene_id']
                             gene_biotype_column = 'biotype'
                         elif data_source == 'xenbase':
-                            gene_id = attributes['ID'].split('-')[1]
+                            gene_id = attributes['ID']
                             gene_biotype_column = 'gene_biotype'
                         else:
                             gene_id = attributes['ID']
                             gene_biotype_column = 'biotype'
                         # Add gene
-                        genes[gene_id] = {'gene_name': attributes.get('Name'),
-                                          'gene_version': attributes.get('version'),
-                                          'gene_biotype': attributes.get(gene_biotype_column),
-                                          'attributes': attributes}
+                        genes[gene_id] = {
+                            'gene_name': attributes.get('Name'),
+                            'gene_version': attributes.get('version'),
+                            'gene_biotype': attributes.get(gene_biotype_column),
+                            'attributes': attributes,
+                        }
                 # Everything else under gene
                 if 'Parent' in attributes:
                     if data_source == 'ensembl':
                         parent_id = attributes['Parent'].split(':')[1]
-                    elif data_source == 'xenbase':
-                        parent_id = attributes['Parent'].split('-')[1]
                     else:
                         parent_id = attributes['Parent']
                     # Transcript
                     if parent_id in genes and parent_id not in wo_transcript_genes:
-                        if (data_source == 'ensembl' or data_source == 'xenbase') and 'transcript_id' in attributes:
+                        # Transcript ID
+                        transcript_stable_id = None
+                        if data_source == 'ensembl' and 'transcript_id' in attributes:
                             transcript_id = attributes['transcript_id']
+                        elif data_source == 'xenbase' and 'transcript_id' in attributes:
+                            transcript_id = attributes['ID']
+                            transcript_stable_id = attributes['transcript_id']
                         elif feature == 'exon' or feature == 'CDS':
                             transcript_id = 't' + str(transcript_num_id)
                             transcript_num_id += 1
@@ -128,30 +137,36 @@ def get_transcripts_gff3(path_annot, convert_ucsc=False, path_mapping=None, data
                         else:
                             transcript_id = 't' + str(transcript_num_id)
                             transcript_num_id += 1
+                        if transcript_stable_id is None:
+                            transcript_stable_id = transcript_id
+                        # Transcript biotype
                         if 'biotype' in attributes:
                             transcript_biotype = attributes['biotype']
                         else:
                             transcript_biotype = genes[parent_id]['gene_biotype']
-                        transcripts[transcript_id] = {'transcript_stable_id': transcript_id,
-                                                      'gene_stable_id': parent_id,
-                                                      'gene_name': genes[parent_id]['gene_name'],
-                                                      'protein_stable_id': None,
-                                                      'chrom': gff_parse_seqname(seqname, convert_ucsc, name_mapping),
-                                                      'strand': strand,
-                                                      'transcript_version': attributes.get('version'),
-                                                      'gene_version': genes[parent_id]['gene_version'],
-                                                      'transcript_biotype': transcript_biotype,
-                                                      'gene_biotype': genes[parent_id]['gene_biotype'],
-                                                      'exons': [],
-                                                      'exons_on_transcript': [],
-                                                      'cds_exons': [],
-                                                      'cds_exons_on_transcript': [],
-                                                      'cds_exons_frame': [],
-                                                      'cds_exons_frame_on_transcript': [],
-                                                      'utr5_exons': [],
-                                                      'utr5_exons_on_transcript': [],
-                                                      'utr3_exons': [],
-                                                      'utr3_exons_on_transcript': []}
+                        # Add transcript
+                        transcripts[transcript_id] = {
+                            'transcript_stable_id': transcript_stable_id,
+                            'gene_stable_id': parent_id,
+                            'gene_name': genes[parent_id]['gene_name'],
+                            'protein_stable_id': None,
+                            'chrom': gff_parse_seqname(seqname, convert_ucsc, name_mapping),
+                            'strand': strand,
+                            'transcript_version': attributes.get('version'),
+                            'gene_version': genes[parent_id]['gene_version'],
+                            'transcript_biotype': transcript_biotype,
+                            'gene_biotype': genes[parent_id]['gene_biotype'],
+                            'exons': [],
+                            'exons_on_transcript': [],
+                            'cds_exons': [],
+                            'cds_exons_on_transcript': [],
+                            'cds_exons_frame': [],
+                            'cds_exons_frame_on_transcript': [],
+                            'utr5_exons': [],
+                            'utr5_exons_on_transcript': [],
+                            'utr3_exons': [],
+                            'utr3_exons_on_transcript': [],
+                        }
                     if parent_id in transcripts:
                         cid = parent_id
                     elif parent_id in wo_transcript_genes and (feature == 'exon' or feature == 'CDS'):
