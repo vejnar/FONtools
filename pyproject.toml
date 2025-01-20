@@ -1,5 +1,68 @@
+[project]
+name = "FONtools"
+authors = [{name = "Charles E. Vejnar"}]
+description = "JSON-based FON (Feature Object Notation) format and tools to simplify genomic annotations usage"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "Mozilla Public License 2.0 (MPL 2.0)"}
+classifiers = [
+    "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Bio-Informatics"
+]
+dependencies = [
+    "pyfaidx",
+    "pyfnutils",
+    "zstandard",
+]
+dynamic = ["version"]
+
+[project.urls]
+homepage = "https://git.sr.ht/~vejnar/FONtools"
+
+[project.scripts]
+ensembl2ucsc = "fontools_scripts.ensembl2ucsc:main"
+fasta_format = "fontools_scripts.fasta_format:main"
+fasta_seq_length = "fontools_scripts.fasta_seq_length:main"
+fon_import = "fontools_scripts.fon_import:main"
+fon_mask_fasta = "fontools_scripts.fon_mask_fasta:main"
+fon_transform = "fontools_scripts.fon_transform:main"
+import_ensembl = "fontools_scripts.import_ensembl:main"
+merge_annot = "fontools_scripts.merge_annot:main"
+
 [build-system]
-requires = ["setuptools", "setuptools_scm", "wheel"]
+requires = ["setuptools>=61", "setuptools_scm", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
+
+[tool.ruff]
+line-length = 120
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    # Pyflakes
+    "F",
+    # Pycodestyle
+    "E",
+    "W",
+    # isort
+    "I001",
+    "I002",
+    # flake8-bugbear
+    "B",
+    # pydocstyle
+    "D"
+]
+ignore = ["D100", "D104", "D200" , "D202", "D205", "D212", "D415", "D416",
+    "E501", "E731", "ANN101", "ANN102", "ANN401", "C408", "PT018"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/{tests,docs}/*" = ["D101", "D102", "D103", "D105"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.isort]
+lines-after-imports = 2
