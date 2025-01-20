@@ -445,4 +445,4 @@ ensembl2ucsc --input "caeele_genome_all_ensembl_wbcel235_chrom_length.tab" \
 
 *FONtools* are distributed under the Mozilla Public License Version 2.0 (see /LICENSE).
 
-Copyright © 2015-2023 Charles E. Vejnar
+Copyright © 2015-2025 Charles E. Vejnar
