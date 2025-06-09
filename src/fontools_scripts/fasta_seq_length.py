@@ -17,15 +17,16 @@ import pyfaidx
 def main(argv=None):
     if argv is None:
         argv = sys.argv
-    parser = argparse.ArgumentParser(description='Create tab file with sequence(s) length from FASTA file.')
-    parser.add_argument('-i', '--input', dest='path_input', action='store', required=True, help='Input.')
-    parser.add_argument('-o', '--output', dest='path_output', action='store', help='Output.')
+    parser = argparse.ArgumentParser(description="Create tab file with sequence(s) length from FASTA file.")
+    parser.add_argument("-i", "--input", dest="path_input", action="store", required=True, help="Input.")
+    parser.add_argument("-o", "--output", dest="path_output", action="store", help="Output.")
     args = parser.parse_args(argv[1:])
 
     gfasta = pyfaidx.Fasta(args.path_input, as_raw=True)
-    with open(args.path_output, 'wt') as fout:
+    with open(args.path_output, "wt") as fout:
         for chrom in sorted(gfasta.keys()):
-            fout.write(f'{chrom}\t{len(gfasta[chrom])}\n')
+            fout.write(f"{chrom}\t{len(gfasta[chrom])}\n")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     sys.exit(main())

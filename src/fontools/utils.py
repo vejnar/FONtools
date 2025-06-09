@@ -12,17 +12,20 @@ import shutil
 
 def check_exe(names):
     for name in names:
-        if shutil.which(name) == None:
-            raise FileNotFoundError(name+' missing')
+        if shutil.which(name) is None:
+            raise FileNotFoundError(f"{name} missing")
+
 
 def strand2direction(strand):
-    if strand == '-':
+    if strand == "-":
         return -1
     else:
         return 1
 
+
 def flatten(l1d):
     return list(itertools.chain.from_iterable(l1d))
+
 
 def get_intervals_union(intervals):
     # Sort intervals
@@ -38,6 +41,7 @@ def get_intervals_union(intervals):
         if x[1] > y[-1][1]:
             y[-1][1] = x[1]
     return y
+
 
 def get_intervals_seq_union(intervals, seqs):
     # Sort intervals
@@ -65,18 +69,20 @@ def get_intervals_seq_union(intervals, seqs):
             y[-1][1] = x[1]
         if x[1] > y[-1][1]:
             if do_seq:
-                s[-1] += seqs[ix][(x[1] - y[-1][1]) * -1:]
+                s[-1] += seqs[ix][(x[1] - y[-1][1]) * -1 :]
             y[-1][1] = x[1]
         ix += 1
-    return y, ''.join(s)
+    return y, "".join(s)
 
-def get_exons_on_transcript(exons, strand='+', tlength=0):
+
+def get_exons_on_transcript(exons, strand="+", tlength=0):
     exons_on_transcript = []
-    for exon in exons[::strand2direction(strand)]:
+    for exon in exons[:: strand2direction(strand)]:
         exon_len = exon[1] - exon[0]
         exons_on_transcript.append([tlength, tlength + exon_len])
         tlength += exon_len
     return exons_on_transcript, tlength
+
 
 def get_intervals_left_disjoint(outer_intervals, inner_intervals):
     ds = []
@@ -92,6 +98,7 @@ def get_intervals_left_disjoint(outer_intervals, inner_intervals):
                     ds.append([x[0], x[1]])
                     break
     return ds
+
 
 def get_intervals_right_disjoint(outer_intervals, inner_intervals):
     ds = []

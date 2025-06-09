@@ -10,7 +10,8 @@ import re
 
 
 def get_species_abv(species, abl=3):
-    return ''.join([s[:abl] for s in species.split('_')])
+    return "".join([s[:abl] for s in species.split("_")])
+
 
 def get_genome_version_std(genome_version):
-    return re.sub(r'[^a-zA-Z0-9]', '', genome_version.lower())
+    return re.sub(r"[^a-zA-Z0-9]", "", genome_version.lower())

@@ -19,26 +19,34 @@ def bed_parse_seqname(seqname, convert_ucsc, name_mapping):
     else:
         return seqname
 
-def get_transcripts_bed6(path_annot, convert_ucsc=False, path_mapping=None, bed_name_as_id=False, bed_feature_id='transcript_stable_id', bed_interval_name='exons'):
+
+def get_transcripts_bed6(
+    path_annot,
+    convert_ucsc=False,
+    path_mapping=None,
+    bed_name_as_id=False,
+    bed_feature_id="transcript_stable_id",
+    bed_interval_name="exons",
+):
     # Open BED
     fbed = []
     for p in path_annot:
-        if p.endswith('.gz'):
-            fbed.append(gzip.open(p, 'rt'))
-        elif p.endswith('.zst'):
-            fbed.append(zstd.open(p, 'rt'))
+        if p.endswith(".gz"):
+            fbed.append(gzip.open(p, "rt"))
+        elif p.endswith(".zst"):
+            fbed.append(zstd.open(p, "rt"))
         else:
-            fbed.append(open(p, 'rt'))
+            fbed.append(open(p, "rt"))
 
     # Open chromosome/scaffold name mapping
     name_mapping = None
     if path_mapping is not None:
         name_mapping = {}
-        with open(path_mapping, 'rt') as f:
-            for l in f:
-                fields = l.strip('\n').split('\t')
+        with open(path_mapping, "rt") as fin:
+            for line in fin:
+                fields = line.strip("\n").split("\t")
                 if len(fields) == 2:
-                    if fields[1] == '':
+                    if fields[1] == "":
                         name_mapping[fields[0]] = None
                     else:
                         name_mapping[fields[0]] = fields[1]
@@ -48,25 +56,27 @@ def get_transcripts_bed6(path_annot, convert_ucsc=False, path_mapping=None, bed_
     transcript_num_id = 1
     # Parse BED
     for f in fbed:
-        for l in f.readlines():
-            if l.startswith('#'):
+        for line in f.readlines():
+            if line.startswith("#"):
                 continue
-            chrom, start, end, name, score, strand = l.split('\t')[:6]
+            chrom, start, end, name, score, strand = line.split("\t")[:6]
             # ID
             if bed_name_as_id:
                 transcript_id = name
             else:
-                transcript_id = 't' + str(transcript_num_id)
+                transcript_id = "t" + str(transcript_num_id)
                 transcript_num_id += 1
             # Transcript
-            t = {bed_feature_id: transcript_id,
-                 'name': name,
-                 'chrom': bed_parse_seqname(chrom, convert_ucsc, name_mapping),
-                 'strand': strand,
-                 bed_interval_name: [[int(start), int(end)]],
-                 bed_interval_name+'_on_transcript': [],
-                 'score': int(score)}
-            t[bed_interval_name+'_on_transcript'], _ = utils.get_exons_on_transcript(t[bed_interval_name], strand)
+            t = {
+                bed_feature_id: transcript_id,
+                "name": name,
+                "chrom": bed_parse_seqname(chrom, convert_ucsc, name_mapping),
+                "strand": strand,
+                bed_interval_name: [[int(start), int(end)]],
+                bed_interval_name + "_on_transcript": [],
+                "score": int(score),
+            }
+            t[bed_interval_name + "_on_transcript"], _ = utils.get_exons_on_transcript(t[bed_interval_name], strand)
             transcripts.append(t)
 
     # Sorting transcripts

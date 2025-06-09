@@ -24,21 +24,23 @@ import fontools as ft
 def split_seq(exons, seq):
     return [seq[s:e] for s, e in exons]
 
+
 def apply_strand(seqs, strand):
-    return [s[::ft.utils.strand2direction(strand)] for s in seqs[::ft.utils.strand2direction(strand)]]
+    return [s[:: ft.utils.strand2direction(strand)] for s in seqs[:: ft.utils.strand2direction(strand)]]
+
 
 def transform_per_gene(features, union_fn):
     unions = []
     # Sort by genes
-    features.sort(key=lambda e: e['gene_stable_id'])
+    features.sort(key=lambda e: e["gene_stable_id"])
     # Loop over genes
-    current_id = ''
+    current_id = ""
     current_union = []
     for a in features:
-        if a['gene_stable_id'] != current_id:
+        if a["gene_stable_id"] != current_id:
             if len(current_union) > 0:
                 unions.append(union_fn(current_union))
-            current_id = a['gene_stable_id']
+            current_id = a["gene_stable_id"]
             current_union = [a]
         else:
             current_union.append(a)
@@ -46,111 +48,159 @@ def transform_per_gene(features, union_fn):
         unions.append(union_fn(current_union))
     return unions
 
+
 def get_annot_union(aset):
     g = aset[0]
     # List of transcripts and proteins
-    g['transcript_stable_ids'] = [c['transcript_stable_id'] for c in aset]
-    g['protein_stable_ids'] = [c['protein_stable_id'] for c in aset if c['protein_stable_id'] is not None]
+    g["transcript_stable_ids"] = [c["transcript_stable_id"] for c in aset]
+    g["protein_stable_ids"] = [c["protein_stable_id"] for c in aset if c["protein_stable_id"] is not None]
     # Union of features
     tlength = 0
-    for f in ['exons', 'utr5_exons', 'cds_exons', 'utr3_exons']:
+    for f in ["exons", "utr5_exons", "cds_exons", "utr3_exons"]:
         ivs = ft.utils.flatten([c[f] for c in aset])
         if len(ivs) > 0:
-            if f == 'exons':
-                seqs = ft.utils.flatten([apply_strand(split_seq(c['exons_on_transcript'], c['seq']), g['strand']) for c in aset if len(c['seq']) > 0])
-                g[f], g['seq'] = ft.utils.get_intervals_seq_union(ivs, seqs)
-                if g['strand'] == '-':
-                    g['seq'] = g['seq'][::-1]
-                g[f + '_on_transcript'], _ = ft.utils.get_exons_on_transcript(g[f], g['strand'])
+            if f == "exons":
+                seqs = ft.utils.flatten(
+                    [
+                        apply_strand(split_seq(c["exons_on_transcript"], c["seq"]), g["strand"])
+                        for c in aset
+                        if len(c["seq"]) > 0
+                    ]
+                )
+                g[f], g["seq"] = ft.utils.get_intervals_seq_union(ivs, seqs)
+                if g["strand"] == "-":
+                    g["seq"] = g["seq"][::-1]
+                g[f + "_on_transcript"], _ = ft.utils.get_exons_on_transcript(g[f], g["strand"])
             else:
                 g[f], _ = ft.utils.get_intervals_seq_union(ivs, [])
-                g[f + '_on_transcript'], tlength = ft.utils.get_exons_on_transcript(g[f], g['strand'], tlength)
+                g[f + "_on_transcript"], tlength = ft.utils.get_exons_on_transcript(g[f], g["strand"], tlength)
         else:
             g[f] = []
-            g[f + '_on_transcript'] = []
+            g[f + "_on_transcript"] = []
     # Remove transcript and protein field(s)
     for k in list(g.keys()):
-        if k.startswith('transcript_') and k != 'transcript_stable_ids':
+        if k.startswith("transcript_") and k != "transcript_stable_ids":
             del g[k]
-        if k.startswith('protein_') and k != 'protein_stable_ids':
+        if k.startswith("protein_") and k != "protein_stable_ids":
             del g[k]
     return g
 
+
 def get_flength(features):
-    return sum([e-s for s, e in features])
+    return sum([e - s for s, e in features])
+
 
 def get_annot_longest(aset):
     mlen = -1
     ilongest = -1
     for i, a in enumerate(aset):
-        l = get_flength(a['exons'])
-        if l > mlen:
+        flength = get_flength(a["exons"])
+        if flength > mlen:
             ilongest = i
-            mlen = l
+            mlen = flength
     return aset[ilongest]
 
-def add_intron_to_features(features, exons_key='exons', introns_key='introns'):
+
+def add_intron_to_features(features, exons_key="exons", introns_key="introns"):
     for feat in features:
         exons = feat[exons_key]
         feat[introns_key] = [[exons[i][1], exons[i + 1][0]] for i in range(0, len(exons) - 1)]
     return features
 
+
 def main(argv=None):
     if argv is None:
         argv = sys.argv
-    parser = argparse.ArgumentParser(description='Transform FON file.')
-    parser.add_argument('-f', '--fon', dest='fon', action='store', required=True, help='Input FON file.')
-    parser.add_argument('-m', '--method', dest='method', action='store', default='union', help='Fusion method (i.e. union, longest, add_introns).')
-    parser.add_argument('-o', '--output', dest='path_output', action='store', required=True, help='Path to output file(s) (comma separated).')
-    parser.add_argument('-z', '--compress', dest='compress', action='store_true', default=False, help='Compress output.')
-    parser.add_argument('-p', '--processor', dest='num_processor', action='store', type=int, default=1, help='Number of processor')
+    parser = argparse.ArgumentParser(description="Transform FON file.")
+    parser.add_argument(
+        "-f",
+        "--fon",
+        dest="fon",
+        action="store",
+        required=True,
+        help="Input FON file.",
+    )
+    parser.add_argument(
+        "-m",
+        "--method",
+        dest="method",
+        action="store",
+        default="union",
+        help="Fusion method (i.e. union, longest, add_introns).",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        dest="path_output",
+        action="store",
+        required=True,
+        help="Path to output file(s) (comma separated).",
+    )
+    parser.add_argument(
+        "-z",
+        "--compress",
+        dest="compress",
+        action="store_true",
+        default=False,
+        help="Compress output.",
+    )
+    parser.add_argument(
+        "-p",
+        "--processor",
+        dest="num_processor",
+        action="store",
+        type=int,
+        default=1,
+        help="Number of processor",
+    )
     args = parser.parse_args(argv[1:])
 
     # Logging
-    logger = pfu.log.define_root_logger('fon_' + args.method)
-    logger.info('Start')
+    logger = pfu.log.define_root_logger("fon_" + args.method)
+    logger.info("Start")
 
     # Check executable(s)
     if args.compress:
-        ft.utils.check_exe(['zstd'])
+        ft.utils.check_exe(["zstd"])
 
     # Parsing FON
-    logger.info('Open FON')
-    if args.fon.endswith('.zst'):
+    logger.info("Open FON")
+    if args.fon.endswith(".zst"):
         fon = json.load(zstd.open(args.fon))
     else:
         fon = json.load(open(args.fon))
 
-    logger.info(f'Transform FON (method:{args.method})')
-    if args.method == 'union':
+    logger.info(f"Transform FON (method:{args.method})")
+    if args.method == "union":
         # Merge using union method
-        features = transform_per_gene(fon['features'], get_annot_union)
-    elif args.method == 'longest':
+        features = transform_per_gene(fon["features"], get_annot_union)
+    elif args.method == "longest":
         # Merge using longest method
-        features = transform_per_gene(fon['features'], get_annot_longest)
+        features = transform_per_gene(fon["features"], get_annot_longest)
         # Sort by transcript
-        features.sort(key=lambda e: e['transcript_stable_id'])
-    elif args.method == 'add_introns':
+        features.sort(key=lambda e: e["transcript_stable_id"])
+    elif args.method == "add_introns":
         # Add new key "introns" using key "exons"
-        features = add_intron_to_features(fon['features'])
+        features = add_intron_to_features(fon["features"])
 
     # Path to output
-    if args.path_output.find('$') != -1:
+    if args.path_output.find("$") != -1:
         ot = string.Template(args.path_output)
-        path_output = [ot.substitute(version='1')]
+        path_output = [ot.substitute(version="1")]
     else:
-        path_output = args.path_output.split(',')
+        path_output = args.path_output.split(",")
     # Write
-    logger.info('FON1 export to '+path_output[0])
+    logger.info("FON1 export to " + path_output[0])
     new_fon = {}
     for k in fon.keys():
-        if k != 'features':
+        if k != "features":
             new_fon[k] = fon[k]
-    new_fon['features'] = features
-    json.dump(new_fon, open(path_output[0], 'wt'))
+    new_fon["features"] = features
+    json.dump(new_fon, open(path_output[0], "wt"))
     # Compress
     if args.compress:
-        subprocess.run(['zstd', '--rm', '-T'+str(args.num_processor), '-19', path_output[0]], check=True)
+        subprocess.run(["zstd", "--rm", f"-T{args.num_processor}", "-19", path_output[0]], check=True)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     sys.exit(main())

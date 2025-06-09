@@ -18,16 +18,20 @@ def find_links(s, left='href="', right='"'):
             break
         j = s.find(right, i + len(left))
         if j >= 0:
-            links.append(s[i+len(left):j])
+            links.append(s[i + len(left) : j])
         i += len(left)
     return links
 
+
 def rlist(url):
     try:
-        p = subprocess.run(['wget', '--quiet', '--output-document=-', url], stdout=subprocess.PIPE, text=True, check=True)
+        p = subprocess.run(
+            ["wget", "--quiet", "--output-document=-", url], stdout=subprocess.PIPE, text=True, check=True
+        )
         return find_links(p.stdout), True
-    except:
+    except Exception:
         return None, False
 
+
 def rget(url, cwd=None):
-    return subprocess.run(['wget', '-m', url], cwd=cwd, check=True)
+    return subprocess.run(["wget", "-m", url], cwd=cwd, check=True)
