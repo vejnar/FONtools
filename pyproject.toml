@@ -4,9 +4,8 @@ authors = [{name = "Charles E. Vejnar"}]
 description = "JSON-based FON (Feature Object Notation) format and tools to simplify genomic annotations usage"
 readme = "README.md"
 requires-python = ">=3.8"
-license = {text = "Mozilla Public License 2.0 (MPL 2.0)"}
+license = "MPL-2.0"
 classifiers = [
-    "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
     "Programming Language :: Python :: 3",
     "Topic :: Scientific/Engineering :: Bio-Informatics"
 ]
