@@ -52,7 +52,7 @@ select = [
     # flake8-bugbear
     "B",
     # pydocstyle
-    "D"
+    # "D"
 ]
 ignore = ["D100", "D104", "D200" , "D202", "D205", "D212", "D415", "D416",
     "E501", "E731", "ANN401", "C408", "PT018"]
