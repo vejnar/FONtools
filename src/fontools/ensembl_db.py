@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 #
 # Copyright © 2015 Charles E. Vejnar
 #
@@ -14,6 +12,7 @@ import gzip
 import sys
 
 from . import ensembl
+
 
 def open_table(path_tsv, index_col=None, index_integer=True, names=['id'], name='Table', list_out=True, filters=[]):
     if index_col is None:

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 #
 # Copyright © 2015 Charles E. Vejnar
@@ -16,9 +15,11 @@ import string
 import subprocess
 import sys
 
-import fontools as ft
 import pyfnutils as pfu
 import pyfnutils.log
+
+import fontools as ft
+
 
 def run_cmd(cmd, logger, cwd=None):
     logger.info('Start ' + str(cmd))

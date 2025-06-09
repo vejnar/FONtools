@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 #
 # Copyright © 2015 Charles E. Vejnar
@@ -20,10 +19,11 @@ import sys
 import tempfile
 
 import pyfaidx
-
-import fontools as ft
 import pyfnutils as pfu
 import pyfnutils.log
+
+import fontools as ft
+
 
 def add_seq(transcripts, path_fasta, cdna, exclude_no_seq):
     new_transcripts = []

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 #
 # Copyright © 2015 Charles E. Vejnar
 #
@@ -12,8 +10,8 @@ import gzip
 
 import zstandard as zstd
 
-from . import ensembl
-from . import utils
+from . import ensembl, utils
+
 
 def bed_parse_seqname(seqname, convert_ucsc, name_mapping):
     if convert_ucsc:

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 #
 # Copyright © 2015 Charles E. Vejnar
 #
@@ -13,8 +11,8 @@ import urllib.parse
 
 import zstandard as zstd
 
-from . import ensembl
-from . import utils
+from . import ensembl, utils
+
 
 def gff_parse_attributes(attributes_raw):
     d = {}

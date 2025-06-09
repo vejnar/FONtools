@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 #
 # Copyright © 2015 Charles E. Vejnar
@@ -10,18 +9,17 @@
 #
 
 import argparse
-import itertools
 import json
-import os
 import string
 import subprocess
 import sys
 
+import pyfnutils as pfu
+import pyfnutils.log
 import zstandard as zstd
 
 import fontools as ft
-import pyfnutils as pfu
-import pyfnutils.log
+
 
 def split_seq(exons, seq):
     return [seq[s:e] for s, e in exons]

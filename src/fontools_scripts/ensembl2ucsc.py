@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 #
 # Copyright © 2015 Charles E. Vejnar
@@ -16,6 +15,7 @@ import sys
 import zstandard as zstd
 
 import fontools as ft
+
 
 def main(argv=None):
     if argv is None:

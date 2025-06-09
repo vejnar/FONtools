@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 #
 # Copyright © 2015 Charles E. Vejnar
 #
@@ -10,6 +8,7 @@
 
 import math
 import os
+
 
 def get_genome_length(path_tab):
     genome_length = 0
@@ -43,7 +42,7 @@ class Star(Index):
 
     def get_path(self, fontools_path_main, species_abv, division, release, genome_version_std, suffix):
         return os.path.join(fontools_path_main, 'star_indices', f"{species_abv}_genome_all_cdna_all_{division}{release}_{genome_version_std}{suffix}_sjdboverhang75")
-    
+
     def get_create_cmds(self, path_genome, path_gff, path_genome_chrom_length, num_processor):
         cmds = []
 

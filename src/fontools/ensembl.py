@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 #
 # Copyright © 2015 Charles E. Vejnar
 #
@@ -16,6 +14,7 @@ import string
 import subprocess
 
 from . import remote
+
 
 class DataSource(object):
     genome_levels = []
@@ -146,7 +145,7 @@ class EnsemblGenomes(EnsemblSource):
         if e:
             for f in ls:
                 db = f.strip('/')
-                rm = re.search(f'ensembl_ontology_', db)
+                rm = re.search('ensembl_ontology_', db)
                 if rm:
                     return path_db + db
         return None

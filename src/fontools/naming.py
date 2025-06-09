@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 #
 # Copyright © 2015 Charles E. Vejnar
 #
@@ -9,6 +7,7 @@
 #
 
 import re
+
 
 def get_species_abv(species, abl=3):
     return ''.join([s[:abl] for s in species.split('_')])

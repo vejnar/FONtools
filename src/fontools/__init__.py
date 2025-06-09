@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 #
 # Copyright © 2015 Charles E. Vejnar
 #
@@ -8,11 +6,4 @@
 # file, You can obtain one at https://www.mozilla.org/MPL/2.0/.
 #
 
-from . import bed
-from . import ensembl
-from . import ensembl_db
-from . import gff
-from . import indexes
-from . import naming
-from . import remote
-from . import utils
+__all__ = ["bed", "ensembl", "ensembl_db", "gff", "indexes", "naming", "remote", "utils"]

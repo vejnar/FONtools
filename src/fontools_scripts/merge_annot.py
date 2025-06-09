@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 #
 # Copyright © 2015 Charles E. Vejnar
@@ -16,11 +15,12 @@ import string
 import subprocess
 import sys
 
+import pyfnutils as pfu
+import pyfnutils.log
 import zstandard as zstd
 
 import fontools as ft
-import pyfnutils as pfu
-import pyfnutils.log
+
 
 def main(argv=None):
     if argv is None:

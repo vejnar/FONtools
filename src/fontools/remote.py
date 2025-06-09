@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 #
 # Copyright © 2015 Charles E. Vejnar
 #
@@ -9,6 +7,7 @@
 #
 
 import subprocess
+
 
 def find_links(s, left='href="', right='"'):
     links = []

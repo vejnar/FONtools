@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 #
 # Copyright © 2015 Charles E. Vejnar
 #
@@ -10,6 +8,7 @@
 
 import itertools
 import shutil
+
 
 def check_exe(names):
     for name in names:

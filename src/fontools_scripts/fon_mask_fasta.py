@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 #
 # Copyright © 2015 Charles E. Vejnar
@@ -14,11 +13,10 @@ import json
 import sys
 
 import pyfaidx
-import zstandard as zstd
-
-import fontools as ft
 import pyfnutils as pfu
 import pyfnutils.log
+import zstandard as zstd
+
 
 def group_coords_by_chrom(feats, key, extension=0, exterior_extension=0):
     by_chrom = {}
