@@ -3,7 +3,7 @@ name = "FONtools"
 authors = [{name = "Charles E. Vejnar"}]
 description = "JSON-based FON (Feature Object Notation) format and tools to simplify genomic annotations usage"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = "MPL-2.0"
 classifiers = [
     "Programming Language :: Python :: 3",
