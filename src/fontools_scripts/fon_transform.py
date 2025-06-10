@@ -19,6 +19,7 @@ import pyfnutils.log
 import zstandard as zstd
 
 import fontools as ft
+import fontools.utils
 
 
 def split_seq(exons, seq):

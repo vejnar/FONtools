@@ -23,6 +23,10 @@ import pyfnutils as pfu
 import pyfnutils.log
 
 import fontools as ft
+import fontools.bed
+import fontools.ensembl_db
+import fontools.gff
+import fontools.utils
 
 
 def add_seq(transcripts, path_fasta, cdna, exclude_no_seq):

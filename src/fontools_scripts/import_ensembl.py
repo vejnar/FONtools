@@ -19,6 +19,11 @@ import pyfnutils as pfu
 import pyfnutils.log
 
 import fontools as ft
+import fontools.ensembl
+import fontools.indexes
+import fontools.naming
+import fontools.remote
+import fontools.utils
 
 
 def run_cmd(cmd, logger, cwd=None):

@@ -15,6 +15,7 @@ import sys
 import zstandard as zstd
 
 import fontools as ft
+import fontools.ensembl
 
 
 def main(argv=None):
