@@ -149,6 +149,11 @@ def get_transcripts_gff3(path_annot, convert_ucsc=False, path_mapping=None, data
                             transcript_biotype = attributes["biotype"]
                         else:
                             transcript_biotype = genes[parent_id]["gene_biotype"]
+                        # Flags
+                        if "tag" in attributes:
+                            flags = attributes["tag"].split(",")
+                        else:
+                            flags = []
                         # Add transcript
                         transcripts[transcript_id] = {
                             "transcript_stable_id": transcript_stable_id,
@@ -161,6 +166,7 @@ def get_transcripts_gff3(path_annot, convert_ucsc=False, path_mapping=None, data
                             "gene_version": genes[parent_id]["gene_version"],
                             "transcript_biotype": transcript_biotype,
                             "gene_biotype": genes[parent_id]["gene_biotype"],
+                            "flags": flags,
                             "exons": [],
                             "exons_on_transcript": [],
                             "cds_exons": [],
